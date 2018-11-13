@@ -25,15 +25,25 @@ namespace C_sharp_Pdf
         {
             var web = new HtmlWeb();
             var html = web.Load(url);
-            var ht = html.DocumentNode.SelectNodes("//div");
-            foreach (var i in ht)
+            var divs = html.DocumentNode.SelectNodes("//div");
+            string problemString = "";
+            foreach (var i in divs)
             {
                 if (i.HasClass("problem-statement"))
                 {
-                    return i.InnerHtml;
+                    problemString = i.InnerHtml;
+                    break;
                 }
             }
-            return "";
+            string matchPatt = "/predownloaded/";
+            string needToAdd = "http://codeforces.com";
+            int myInt = problemString.IndexOf(matchPatt, 0);
+            while (myInt != -1)
+            {
+                problemString = problemString.Insert(myInt, needToAdd);
+                myInt = problemString.IndexOf(matchPatt, myInt + needToAdd.Length + 1);
+            }
+            return "<center>"+problemString+"</center>";
         }
 
         public void generatePDF(string pdfString)
@@ -44,9 +54,6 @@ namespace C_sharp_Pdf
             //PdfDocument pdf = PdfGenerator.GeneratePdf("<p><h1>Hello World</h1>This is html rendered text</p>", PageSize.A4);
             pdf.Save("document.pdf");
         }
-
-
-
 
         private void button1_Click(object sender, EventArgs e)
         {
