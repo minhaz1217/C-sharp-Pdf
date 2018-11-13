@@ -21,6 +21,8 @@ namespace C_sharp_Pdf
             InitializeComponent();
         }
         public string urlCodeForces = "http://codeforces.com/contest/924/problem/C";
+        public string urlSpoj = "https://www.spoj.com/problems/JULKA/";
+
         public string getCodeForces(string url)
         {
             var web = new HtmlWeb();
@@ -46,6 +48,31 @@ namespace C_sharp_Pdf
             return "<center>"+problemString+"</center>";
         }
 
+        public string getSpoj(string url) {
+            var web = new HtmlWeb();
+            var html = web.Load(url);
+            var divs = html.DocumentNode.SelectNodes("//div");
+            string problemString = "";
+            foreach (var i in divs)
+            {
+
+                if (i.Id == "ccontent") {
+                    i.Remove();
+                }
+                
+            } 
+            foreach (var i in divs)
+            {
+                if (i.HasClass("prob"))
+                {
+                    //MessageBox.Show(i.LastChild.InnerHtml);
+                    problemString = i.InnerHtml;
+                    break;
+                }
+            }
+            return problemString;
+        }
+
         public void generatePDF(string pdfString)
         {
 
@@ -57,12 +84,18 @@ namespace C_sharp_Pdf
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string myString = getCodeForces(urlCodeForces);
+            string myString = getSpoj(urlSpoj);
             richTextBox1.Text = myString;
             if (myString != "")
             {
                 generatePDF(myString);
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            webBrowser1.ScriptErrorsSuppressed = true;
+            webBrowser1.DocumentText = richTextBox1.Text;
         }
     }
 }
