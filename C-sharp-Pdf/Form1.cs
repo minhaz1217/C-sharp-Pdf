@@ -25,6 +25,7 @@ namespace C_sharp_Pdf
         public string urlCodeForces = "http://codeforces.com/contest/924/problem/C";
         public string urlSpoj = "https://www.spoj.com/problems/JULKA/";
         public string urlHackerrank = "https://www.hackerrank.com/challenges/designer-pdf-viewer/problem" ;
+        public string urlLightOj = "http://lightoj.com/volume_showproblem.php?problem=1002";
 
         public string getCodeForces(string url)
         {
@@ -113,24 +114,56 @@ namespace C_sharp_Pdf
             }
             return problemString;
         }
-        
+
+        public string getLightoj(string url) {
+
+            var web = new HtmlWeb();
+            var html = web.Load(url);
+            var divs = html.DocumentNode.SelectNodes("//div");
+
+            
+            string problemString = "";
+            foreach (var i in divs)
+            {
+
+                if (i.Id == "problem")
+                {
+                    problemString = i.InnerHtml;
+                    break;
+                }
+            }
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(problemString);
+            foreach (HtmlNode i in doc.DocumentNode.SelectNodes("//img") ){
+                var val = i.GetAttributeValue("src", "");
+
+                if(val != ""){
+                    i.SetAttributeValue("src", "http://lightoj.com/" + val);
+                }
+            }
+
+
+            return doc.DocumentNode.InnerHtml;
+
+        }
         public void generatePDF(string pdfString)
         {
 
 
             PdfDocument pdf = PdfGenerator.GeneratePdf(pdfString, PageSize.A4);
             //PdfDocument pdf = PdfGenerator.GeneratePdf("<p><h1>Hello World</h1>This is html rendered text</p>", PageSize.A4);
-            pdf.Save("documen"+ 1.ToString() +".pdf");
+            pdf.Save("documen" + DateTime.Now.ToString("hh_mm_ss") + ".pdf");
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string myString = getHackerrank(urlHackerrank);
-            richTextBox1.Text = myString;
+            string myString = getLightoj(urlLightOj);
+            richTextBox1.AppendText("\n\n");
+            richTextBox1.AppendText(myString);
             //MessageBox.Show(myString.Length.ToString());
             if (myString != "")
             {
-                generatePDF(myString);
+                generatePDF("<div> " + myString + "</div>");
             }
         }
 
